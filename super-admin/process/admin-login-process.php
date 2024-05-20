@@ -1,4 +1,3 @@
-
 <?php
 
 include('../config/connect.php');
@@ -20,13 +19,14 @@ if(isset($_POST['super_admin_username'], $_POST['super_admin_password'])) {
     $super_admin_username = mysqli_real_escape_string($con, $_POST['super_admin_username']);
     $super_admin_password = mysqli_real_escape_string($con, $_POST['super_admin_password']);
 
-    // Hash the password for better security
-    $hashed_password = md5($super_admin_password); // You should consider using stronger hashing algorithms like bcrypt
+    // Hash the password for basic security
+    $hashed_password = md5($super_admin_password);
 
-    $admin_login_query = "SELECT * FROM super_admin_login WHERE username = '$super_admin_username' AND password = '$hashed_password' LIMIT 1";
-    $admin_login_result = mysqli_query($con, $admin_login_query);
+    // Default username and password
+    $default_username = 'admin';
+    $default_password = md5('admin');
 
-    if($admin_login_result && mysqli_num_rows($admin_login_result) == 1) {
+    if($super_admin_username === $default_username && $hashed_password === $default_password) {
         // Start session only if login is successful
         session_start();
         $_SESSION['super_admin_username'] = $super_admin_username;
