@@ -3,33 +3,47 @@
 
 include('../config/connect.php');
 
+// Check if the database connection is successful
+if (!$con) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
 
+// Select the database
+$db_selected = mysqli_select_db($con, 'ep');
 
-if(isset($_POST['super_admin_username']) && ($_POST['super_admin_password'])){
+// Check if the database selection succeeded
+if (!$db_selected) {
+    die("Database selection failed: " . mysqli_error($con));
+}
 
-  $super_admin_username = $_POST['super_admin_username'];
-  $super_admin_password = $_POST['super_admin_password'];
+if(isset($_POST['super_admin_username'], $_POST['super_admin_password'])) {
+    $super_admin_username = mysqli_real_escape_string($con, $_POST['super_admin_username']);
+    $super_admin_password = mysqli_real_escape_string($con, $_POST['super_admin_password']);
 
-  $admin_login_query = "SELECT * FROM super_admin_login WHERE username = '$super_admin_username' && password = '$super_admin_password' LIMIT 1";
-  $admin_login = mysqli_query($con, $admin_login_query);
+    // Hash the password for better security
+    $hashed_password = md5($super_admin_password); // You should consider using stronger hashing algorithms like bcrypt
 
-  $count_admin = mysqli_num_rows($admin_login);
+    $admin_login_query = "SELECT * FROM super_admin_login WHERE username = '$super_admin_username' AND password = '$hashed_password' LIMIT 1";
+    $admin_login_result = mysqli_query($con, $admin_login_query);
 
-  if($count_admin == 1){
-
-    header("location: ../admin-meal-report.php");
-    //echo "successfully logged in";
-    session_start();
-    
-    $_SESSION['super_admin_username'] = $super_admin_username;
-    //$_SESSION['employee_name'] = $employee_name;
-     
-    exit();
-
-  }else{
-      echo "<script> alert(' Incorrect information, try again !!') </script>";
-      echo "<script> window.open('../index.php','_self'); </script>";
+    if($admin_login_result && mysqli_num_rows($admin_login_result) == 1) {
+        // Start session only if login is successful
+        session_start();
+        $_SESSION['super_admin_username'] = $super_admin_username;
+        
+        // Redirect to admin-meal-report.php
+        header("Location: ../admin-meal-report.php");
+        exit();
+    } else {
+        // Display error message if login fails
+        echo "<script>alert('Incorrect information, try again !!')</script>";
+        echo "<script>window.open('../index.php','_self')</script>";
+        exit();
     }
-
-}                     
+} else {
+    // Handle case when username or password is not set
+    echo "<script>alert('Please provide both username and password')</script>";
+    echo "<script>window.open('../index.php','_self')</script>";
+    exit();
+}
 ?>
