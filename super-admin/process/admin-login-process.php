@@ -30,11 +30,11 @@ if(isset($_POST['super_admin_username']) && ($_POST['super_admin_password'])){
   if($count_admin == 1){
 
     header("location: ../admin-meal-report.php");
-    //echo "successfully logged in";
+    echo "successfully logged in";
     session_start();
     
     $_SESSION['super_admin_username'] = $super_admin_username;
-    //$_SESSION['employee_name'] = $employee_name;
+    $_SESSION['employee_name'] = $employee_name;
      
     exit();
 
